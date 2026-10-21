@@ -21,7 +21,7 @@ The TL;DR line does it all: Termux deps, pinned npm package, checksummed static 
 
 ## Termux quirks & workarounds
 - Static musl is the whole trick — the binary ignores Android's missing glibc entirely.
-- Loopback proxy is wrapper-scoped, never shell-wide. ⚠️ The wrapper expects the `127.0.0.1:18080` supervisor (`~/bin/ensure-local-proxy.sh`) from the full mrfandu1 installer (`proxy/` dir); without it network calls hang — fetch the supervisor or delete the three proxy lines from `$PREFIX/bin/codex`.
+- Loopback proxy is wrapper-scoped, never shell-wide. ⚠️ The wrapper expects the `127.0.0.1:18080` supervisor (`~/bin/ensure-local-proxy.sh`) from the upstream community installer's `proxy/` dir; without it network calls hang — fetch the supervisor or delete the three proxy lines from `$PREFIX/bin/codex`.
 - Phantom process killer (~32 procs) + TMPDIR inside Termux home — see [Claude-Code-Android](../Claude-Code-Android/README.md).
 - Don't delete `codex-code-mode-host`; the CLI spawns it for code mode.
 

@@ -14,7 +14,7 @@ The TL;DR line does it all: glibc runtime, checksummed payload, rpath patch, fac
 
 ## Step-by-step
 1. `pkg install -y patchelf zstd nodejs glibc-repo && pkg install -y glibc` → `$PREFIX/glibc/lib/ld-linux-aarch64.so.1`.
-2. Download `agy.bin.zst` + `SHA256SUMS` from the mrfandu1 payloads release (Antigravity 1.4.2), sha256-verify, `zstd -d` to `~/.local/bin/agy.bin`.
+2. Download `agy.bin.zst` + `SHA256SUMS` from the payloads release (below; Antigravity 1.4.2), sha256-verify, `zstd -d` to `~/.local/bin/agy.bin`.
 3. `patchelf --set-rpath $PREFIX/glibc/lib ~/.local/bin/agy.bin`
 4. Blob patch: scan 4-byte-aligned offsets for `movz x0,#439` (`e0 36 80 d2`), rewrite to `movz x0,#48` (`00 06 80 d2`). Zero matches = loud failure, never silent success.
 5. Wrapper `~/.local/bin/agy`: clears `LD_PRELOAD` (Bionic symbols must not leak into the glibc process), execs `ld-linux-aarch64.so.1 --library-path $PREFIX/glibc/lib agy.bin`.

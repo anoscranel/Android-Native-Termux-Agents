@@ -16,7 +16,7 @@ The TL;DR line installs: Termux deps, checksummed Alpine musl runtime, pinned np
 1. `pkg install -y nodejs zstd patchelf tar curl`
 2. Extract Alpine v3.24 aarch64 APKs (`musl`, `libgcc`, `libstdc++`) into `$HOME/.local` and `$PREFIX/lib/musl`.
 3. `npm install -g @anthropic-ai/claude-code@2.1.288` — its `$PREFIX/bin/claude` stays a broken stub.
-4. Download `claude.bin.zst` + `SHA256SUMS` from the mrfandu1 payloads release, sha256-verify, `zstd -d` to `~/.local/bin/claude-bin`.
+4. Download `claude.bin.zst` + `SHA256SUMS` from the payloads release (below), sha256-verify, `zstd -d` to `~/.local/bin/claude-bin`.
 5. `patchelf --set-interpreter $HOME/.local/lib/ld-musl-aarch64.so.1 --set-rpath $HOME/.local/lib:$PREFIX/lib/musl/lib:$PREFIX/lib/musl/usr/lib` on `claude-bin`.
 6. Wrapper `~/.local/bin/claude`: `DISABLE_AUTOUPDATER=1`, clears `LD_PRELOAD`, execs `claude-bin`.
 7. PATH: `$HOME/.local/bin` must precede `$PREFIX/bin`.
