@@ -8,6 +8,13 @@ Run AI coding-harness CLIs **natively on Android via Termux** — no proot, no c
 
 Everything ships for **aarch64 phones** (arm64). Verified on a real aarch64 Android phone (Termux from F-Droid, Node v24). Devices with ≥4 GB RAM recommended; 6 GB+ comfortable.
 
+## Getting Termux
+
+Install Termux **from F-Droid or the official GitHub repo** — the Google Play build is deprecated and throws unwritable-path errors:
+
+- **F-Droid:** https://f-droid.org/packages/com.termux/
+- **Official GitHub (releases APK):** https://github.com/termux/termux-app
+
 ## TL;DR — the whole zoo, one table
 
 | # | Harness | Verdict | Confidence | One command |
@@ -61,7 +68,7 @@ Every `<Name>-Android/` dir has a README with **TL;DR first, one-command install
 
 - **Phantom process killer** silently caps ~32 child processes per shell session, device-wide — run long harness sessions inside `tmux`, and never export supervisor proxies shell-wide.
 - **TMPDIR**: several tools assume a real `/tmp`; Termux's `$PREFIX/tmp` works but some installers need it exported explicitly.
-- Use the **F-Droid Termux build**; the Play build is deprecated and throws unwritable-path errors.
+- Use the **F-Droid build of Termux** (see above — Google Play build is deprecated).
 - Auth flows that expect a desktop browser still work — they print a URL you open manually on the phone.
 
 ## Confidence & verification
