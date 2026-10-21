@@ -1,6 +1,6 @@
 # Android-Native-Termux-Agents
 
-[![License: MIT](LICENSE)](LICENSE) · **Platform:** Android aarch64 · [Termux](https://github.com/termux/termux-app) (F-Droid build) · **Zero proot/chroot/VM**
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) · **Platform:** Android aarch64 · [Termux](https://github.com/termux/termux-app) (F-Droid build) · **Zero proot/chroot/VM**
 
 Run AI coding-harness CLIs **natively on Android via Termux** — no proot, no chroot, no VM, no userland distro emulation. One-command install per harness, step-by-step below each, TL;DR up top in every README.
 
