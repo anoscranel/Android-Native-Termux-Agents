@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # perchai-cli (Perch AI) installer for native Android Termux — no proot/chroot/VM.
-# Exists only because of @napi-rs/canvas (no android-arm64 prebuild); tries the
-# plain install, then documented fallbacks.
+# @napi-rs/canvas resolves its android-arm64 prebuild today (checked on a real
+# phone, 2026-10-20). The script still pins the version and keeps two fallbacks
+# in case a future canvas release breaks the plain install.
 set -Eeuo pipefail
 
 PKG="perchai-cli"

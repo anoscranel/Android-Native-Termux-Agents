@@ -20,18 +20,16 @@ The TL;DR line is the official installer. Then `muse --version`; sign-in on firs
 4. Verified (2026-10-20): channel → `1.4.11-R6667.1`; per-arch sha256 in lookaside `manifest.json`; ELF `statically linked`.
 5. Size warning: binary is **~330 MB** — plan disk/data.
 
-## Auth on a phone
-Launcher drives an **OAuth 2.0 device-code grant** against `auth.meta.com` (verified in live launcher source): prints URL + code, approve in browser (`termux-open-url`), CLI polls. Credentials at `${XDG_CONFIG_HOME:-$HOME/.config}/muse/auth.json` (`MUSE_AUTH_PATH` overrides). No localhost callback server — most phone-friendly auth here. ⚠️ `termux-open-url` needs `pkg install termux-api` + the Termux:API app.
-
 ## Termux quirks & workarounds
+- **Auth:** the launcher runs an **OAuth 2.0 device-code grant** against `auth.meta.com`: it prints a URL and code, you approve in the browser (`termux-open-url`), the CLI polls. Credentials: `${XDG_CONFIG_HOME:-$HOME/.config}/muse/auth.json` (`MUSE_AUTH_PATH` overrides). No localhost callback. ⚠️ `termux-open-url` needs `pkg install termux-api` + the Termux:API app.
 - **`sh` piping silently breaks the installer** (bash-only `[[...]]` tests) — pipe to `bash`, not `sh`.
-- Install dir **must live under `$HOME`** — the installer refuses `$TMPDIR` paths (we hit and confirmed this). Use `~/.muse-test` or default `~/.local`; `MUSE_INSTALL_DIR=$HOME/<dir> MUSE_NO_MODIFY_PATH=1 MUSE_LOGIN=0` keeps it sandboxed.
+- Install dir **must live under `$HOME`** — the installer refuses `$TMPDIR` paths (confirmed in an on-device check). Use `~/.muse-test` or default `~/.local`; `MUSE_INSTALL_DIR=$HOME/<dir> MUSE_NO_MODIFY_PATH=1 MUSE_LOGIN=0` keeps it sandboxed.
 - `git` required at runtime for worktree features — `pkg install git`.
-- Phantom process killer / TMPDIR / tmux — see [Claude-Code-Android](../Claude-Code-Android/README.md).
+- Phantom process killer (~32 child processes, device-wide): use `tmux` and disable child-process restrictions in Developer Options.
 
 ## Limits
 - Device-verified to `--version` only (1.4.11-R6667.1, 345,970,792-byte binary matches manifest). No full agent loop on-device yet.
-- ⚠️ "OS sandbox" likely degrades silently on Android — no legal namespaces/seccomp-userland equivalent inside Termux (unverified).
+- ⚠️ The "OS sandbox" may silently do nothing on Android: Android blocks the unprivileged Linux namespaces such sandboxes usually rely on (unverified for Muse).
 - Proprietary — no public source repo found.
 
 ## Sources

@@ -16,7 +16,6 @@ if [ "$arch" != "aarch64" ]; then
 fi
 
 command -v curl >/dev/null || { echo '==>' "Installing curl"; pkg install -y curl; }
-command -v dpkg >/dev/null || { echo '==>' "Installing dpkg"; pkg install -y dpkg; }
 command -v sha256sum >/dev/null || { echo '==>' "Installing coreutils"; pkg install -y coreutils; }
 
 if [ -n "$VER" ]; then
@@ -61,8 +60,8 @@ else
   echo '⚠️  opencode-bionic is a third-party build; installing it is a trust decision.'
 fi
 
-echo '==>' "Installing ${deb##*/} via dpkg"
-dpkg -i "$deb"
+echo '==>' "Installing ${deb##*/} via apt (resolves dependencies)"
+apt install -y "$deb"
 
 echo '==>' "Verifying install"
 opencode --version

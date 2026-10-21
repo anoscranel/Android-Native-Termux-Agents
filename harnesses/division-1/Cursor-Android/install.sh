@@ -2,6 +2,7 @@
 # Cursor cursor-agent on native Termux — official installer + glibc loaders.
 # Device-verified 2026-10-20 (2026.10.19-6bbf2c4 boots + --version prints).
 # Idempotent: safe to re-run; re-heals wrappers/patches after Cursor updates.
+# The vendor installer is not pinned and not hash-verified: it installs the latest build.
 # Never touches login state, never exports proxies.
 set -Eeuo pipefail
 
@@ -26,21 +27,29 @@ latest="$(ls -1d "$BASE"/*/ 2>/dev/null | sort -V | tail -n1)"
   || { echo '!! version dir missing bundled node/index.js'; exit 1; }
 echo "==> newest version dir: $latest"
 
-# Child-SEA trap: index.js spawns sibling ELF binaries (cursor-agent-sea,
-# cursor-agent-worker-sea, cursorsandbox) directly — their PT_INTERP points to
-# the Linux default path which does not exist on Android. Point it at Termux's
-# glibc loader. (.node shared libs are dlopened by the patched node — no interp.)
+# Child-binary trap: index.js spawns sibling ELF binaries in the version dir
+# directly. Their PT_INTERP points to the Linux default glibc loader path, which
+# does not exist on Android. Point every such binary at Termux's glibc loader.
+# (.node addons are shared libraries with no interpreter; they are skipped.)
 echo '==> patching child binaries (glibc interpreter)'
-for f in node cursor-agent-sea cursor-agent-worker-sea cursorsandbox; do
-  if [ -e "$latest/$f" ]; then
-    patchelf --set-interpreter "$LOADER" "$latest/$f" \
-      && echo "    patched $f" \
-      || echo "    !! patchelf failed for $f (may be static — fine)"
-  fi
+for f in "$latest"*; do
+  [ -f "$f" ] && [ ! -L "$f" ] || continue
+  interp="$(patchelf --print-interpreter "$f" 2>/dev/null || true)"
+  case "$interp" in
+    "$LOADER") : ;;                                   # already patched
+    */ld-linux-aarch64.so.1)
+      if patchelf --set-interpreter "$LOADER" "$f"; then
+        echo "    patched ${f##*/}"
+      else
+        echo "    !! patchelf failed for ${f##*/}"
+      fi ;;
+    *) : ;;                                           # static, script, or library
+  esac
 done
 
 write_wrapper() {
-  # $1 = wrapper path
+  # $1 = wrapper path. Remove first so a symlink target is never overwritten.
+  rm -f "$1"
   cat > "$1" <<'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
 BASE="$HOME/.local/share/cursor-agent/versions"
@@ -54,13 +63,19 @@ EOF
 
 mkdir -p "$BIN_DIR"
 echo '==> writing glibc-runner wrappers (replace installer symlinks)'
-rm -f "$BIN_DIR/cursor-agent"
 write_wrapper "$BIN_DIR/cursor-agent"
-if [ -L "$BIN_DIR/agent" ] || [ -e "$BIN_DIR/agent" ]; then
-  # 'agent' collides with Grok Build's ~/.grok/bin/agent — PATH order decides.
-  rm -f "$BIN_DIR/agent"
-  write_wrapper "$BIN_DIR/agent"
-  echo '==> wrapped ~/.local/bin/agent too (note: collides with Grok Build agent — PATH order decides)'
+# Replace ~/.local/bin/agent only when it is Cursor's own symlink (it points into
+# $BASE). Any other 'agent' there belongs to something else and is left alone.
+# (Grok Build installs its own 'agent' in ~/.grok/bin; PATH order decides.)
+if [ -L "$BIN_DIR/agent" ]; then
+  agent_target="$(readlink -f "$BIN_DIR/agent" 2>/dev/null || true)"
+  case "$agent_target" in
+    "$BASE"/*)
+      write_wrapper "$BIN_DIR/agent"
+      echo '==> wrapped ~/.local/bin/agent too' ;;
+    *)
+      echo "==> ~/.local/bin/agent points to $agent_target (not Cursor) — left untouched" ;;
+  esac
 fi
 
 echo '==> verifying…'

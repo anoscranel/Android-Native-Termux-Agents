@@ -12,10 +12,7 @@ MiniMax's official open-source TUI coding agent **MiniMax Code** (bins `mcode`, 
 ⚠️ Distinct from MiniMax's **other** official CLI `mmx` (`mmx-cli`, multimodal media platform) — do not confuse the two.
 
 ## One-command install
-```bash
-curl -fsSL https://raw.githubusercontent.com/anoscranel/Android-Native-Termux-Agents/master/harnesses/division-2/Minimax-Code-Android/install.sh | bash
-```
-The script = npm install **plus** the mandatory ripgrep swap below — that is why one npm line alone is not enough.
+The TL;DR line is the one command. The script = npm install **plus** the mandatory ripgrep swap below — that is why one npm line alone is not enough.
 
 ## Step-by-step
 1. `pkg install nodejs ripgrep build-essential python` (Termux Node v24.18 sits inside `<27`).
@@ -27,13 +24,13 @@ The script = npm install **plus** the mandatory ripgrep swap below — that is w
    If the npm install already died at the `@vscode/ripgrep` postinstall: `mkdir -p` that `bin` dir, copy first, then re-run the npm install.
 4. Log in with a subscription key from `platform.minimax.io/console/plan` (phone-friendly paste flow).
 
-Vendor route (desktop): `curl -fsSL https://filecdn.minimax.chat/public/install.sh | bash` — explicitly does **not** support musl; Termux users stay on the npm path.
+Vendor script (`curl -fsSL https://filecdn.minimax.chat/public/install.sh | bash`) does **not** support musl; on Termux stay on the npm path.
 
 ## Termux quirks & workarounds
 - **Bins are `mcode` + `mcode-tools`** — NOT `minimax`. The npm engine gate also hard-blocks Android; use `npm install -g @minimax-ai/code@0.6.12 --force`.
 - `better-sqlite3` scripts are skipped under `--force` (optional dep — CLI boots without it). `@vscode/ripgrep` ships glibc linux-arm64; the shim in step 3 handles it (Termux `rg` drop-in).
 - On-device Node 24.18 needs no engine override.
-- Long agent sessions: `tmux` + `termux-wake-lock` (Android phantom process killer).
+- Phantom process killer (~32 child processes, device-wide): use `tmux` and disable child-process restrictions in Developer Options.
 - `mcode exec` = headless/CI mode, scriptable.
 
 ## Limits

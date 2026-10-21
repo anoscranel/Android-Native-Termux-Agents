@@ -30,6 +30,7 @@ pkg install -y glibc glibc-runner tar curl
 echo "==> download freebuff ${FB_VERSION} linux-arm64 tarball"
 mkdir -p "$FB_DIR" "$TMPDIR"
 FB_TGZ="$TMPDIR/freebuff-${FB_VERSION}-linux-arm64.tar.gz"
+trap 'rm -f "$FB_TGZ"' EXIT
 curl -fsSL --retry 3 -o "$FB_TGZ" "$FB_URL"
 
 if [ -n "$FB_SHA256" ]; then
@@ -43,6 +44,9 @@ chmod +x "${FB_DIR}/freebuff"
 printf '{"version":"%s","target":"linux-arm64"}\n' "$FB_VERSION" > "${FB_DIR}/freebuff-metadata.json"
 
 echo "==> install native launcher (grun wrapper)"
+# Remove first: `npm i -g freebuff` leaves a symlink here, and writing through it
+# would overwrite the npm package's launcher.
+rm -f "$PREFIX/bin/freebuff"
 cat > "$PREFIX/bin/freebuff" <<'SH'
 #!/data/data/com.termux/files/usr/bin/bash
 # Native glibc wrapper — NOT proot. grun is Termux glibc-repo's loader wrapper.

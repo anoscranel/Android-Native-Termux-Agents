@@ -24,6 +24,7 @@ else
   if ! install_pkg; then
     echo '==> npm install exited nonzero (likely @vscode/ripgrep postinstall tried to run its glibc rg) — pre-staging Termux rg and retrying…'
     mkdir -p "$RG_DIR"
+    rm -f "$RG_TARGET"
     cp "$PREFIX/bin/rg" "$RG_TARGET"
     install_pkg
   fi
@@ -31,6 +32,7 @@ fi
 
 echo '==> Applying ripgrep shim (replace glibc rg with Termux rg)…'
 mkdir -p "$RG_DIR"
+rm -f "$RG_TARGET"
 cp "$PREFIX/bin/rg" "$RG_TARGET"
 
 echo '==> Verifying…'

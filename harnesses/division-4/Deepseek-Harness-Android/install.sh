@@ -5,6 +5,7 @@
 set -Eeuo pipefail
 
 DSH_VERSION="${DSH_VERSION:-0.1.0-rc.6}"
+NODE_GYP_VERSION="${NODE_GYP_VERSION:-13.0.1}"   # needs Node ^22.22.2 or ^24.15.0
 DSH_ROOT="$HOME/.local/dsh"
 
 echo "==> dsh-android: init"
@@ -13,22 +14,25 @@ echo "==> dsh-android: init"
 echo "==> packages"
 pkg update -y
 pkg install -y nodejs pnpm python make clang cmake curl tar
-npm i -g node-gyp 2>/dev/null || true
+npm i -g "node-gyp@${NODE_GYP_VERSION}"
 
 echo "==> workspace $DSH_ROOT"
 mkdir -p "$DSH_ROOT" "$HOME/.local/bin"
-cd "$DSH_ROOT"
+cd "$DSH_ROOT" || exit 1
 [ -f package.json ] || printf '{"name":"dsh","version":"1.0.0","private":true,"type":"commonjs"}\n' > package.json
 
 echo "==> add @deepseek-ai/dsh@${DSH_VERSION} (+ @img/sharp-wasm32 shim)"
 CYPRESS_INSTALL_BINARY=0 pnpm add "@deepseek-ai/dsh@${DSH_VERSION}" "@img/sharp-wasm32@0.35.3"
 
 echo "==> native dep 1/2: node-pty (source build for bionic)"
-NPT_DIR=$(echo "$DSH_ROOT"/node_modules/.pnpm/node-pty@*/node_modules/node-pty)
+# After a version bump pnpm can keep two copies; build the newest one.
+NPT_DIR=$(ls -d "$DSH_ROOT"/node_modules/.pnpm/node-pty@*/node_modules/node-pty 2>/dev/null | sort -V | tail -n1 || true)
+[ -n "$NPT_DIR" ] || { echo '!! node-pty not found in the pnpm store'; exit 1; }
 (cd "$NPT_DIR" && node-gyp rebuild)
 
 echo "==> native dep 2/2: koffi (patch Android statx macro clash, then build)"
-KOFFI_DIR=$(echo "$DSH_ROOT"/node_modules/.pnpm/koffi@*/node_modules/koffi)
+KOFFI_DIR=$(ls -d "$DSH_ROOT"/node_modules/.pnpm/koffi@*/node_modules/koffi 2>/dev/null | sort -V | tail -n1 || true)
+[ -n "$KOFFI_DIR" ] || { echo '!! koffi not found in the pnpm store'; exit 1; }
 python3 - "$KOFFI_DIR/lib/native/base/base.cc" <<'PY'
 import sys
 p = sys.argv[1]
@@ -49,6 +53,7 @@ PY
 (cd "$KOFFI_DIR" && node ./cnoke.cjs -P . -D src/koffi --prebuild --release)
 
 echo "==> dsh wrapper (~/.local/bin/dsh)"
+rm -f "$HOME/.local/bin/dsh"
 cat > "$HOME/.local/bin/dsh" <<'SH'
 #!/data/data/com.termux/files/usr/bin/env bash
 DSH_ROOT="$HOME/.local/dsh"

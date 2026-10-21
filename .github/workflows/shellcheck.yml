@@ -1,0 +1,16 @@
+name: shellcheck
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run shellcheck on install scripts
+        run: shellcheck -s bash -S warning harnesses/*/*/install.sh

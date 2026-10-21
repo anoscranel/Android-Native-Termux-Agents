@@ -21,9 +21,9 @@ The TL;DR line is the official installer. Installs `~/.grok/bin/{grok,agent}` (b
 
 ## Termux quirks & workarounds
 - **Installer side effects** (device-verified): creates `~/.grok/bin/{grok,agent}` symlinks, downloads into `~/.grok/downloads/grok-linux-aarch64`, and **appends an `export PATH` line to `~/.bashrc`**. Set `GROK_BIN_DIR` (e.g. `GROK_BIN_DIR=$PREFIX/bin curl … | bash`) to skip both.
-- **Name collisions:** community `grok-cli` also claims `grok`; Cursor also installs `agent` (`~/.local/bin/agent`). PATH order decides; `command -v agent` for truth.
-- Auth: `grok login --device-auth` (writes `~/.grok/auth.json`); `GROK_DEPLOYMENT_KEY` skips the browser (SSH-friendly). `termux-open-url` for the URL.
-- Phantom process killer / TMPDIR / tmux — see [Claude-Code-Android](../Claude-Code-Android/README.md).
+- **Name clashes:** community `grok-cli` also claims `grok`; Cursor also installs `agent` (`~/.local/bin/agent`). PATH order decides; `command -v agent` shows which one runs.
+- Device auth prints a URL: open it with `termux-open-url`.
+- Phantom process killer (~32 child processes, device-wide): use `tmux` and disable child-process restrictions in Developer Options.
 
 ## Limits
 - Device-verified only to `--version` and help output on 2026-10-20 (static-linked, no dlopen risk surface seen). Full agent loop never exercised; a seccomp-trapped syscall (known offender: `faccessat2`) can SIGSYS mid-run — none observed. Standing repair if it ever appears: the blob patch in [Antigravity-Android](../Antigravity-Android/README.md).
@@ -34,4 +34,3 @@ The TL;DR line is the official installer. Installs `~/.grok/bin/{grok,agent}` (b
 - https://x.ai/cli/install.sh (fetched live 2026-10-20: auth order `GROK_DEPLOYMENT_KEY`→`auth.json`; os/arch arms; BIN_DIR layout)
 - https://x.ai/cli/stable → 1.0.62; `https://x.ai/cli/grok-1.0.62-linux-aarch64` → static ELF (probed 2026-10-20)
 - https://cosyra.com/guides/grok-cli-vs-grok-build.html (⚠️ secondary single source)
-- https://dev.to/andrew-ooo/grok-cli-review-the-community-grok-coding-agent-2026-4c1f (disambiguation cross-check)

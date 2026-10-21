@@ -17,23 +17,26 @@ pkg install -y glibc glibc-runner curl coreutils
 command -v grun >/dev/null || { echo "!! grun missing (glibc-runner pkg) after install — aborting"; exit 1; }
 [ -e "$PREFIX/glibc/lib/ld-linux-aarch64.so.1" ] || { echo "!! glibc loader missing — aborting"; exit 1; }
 
-if [ -x "$DROID_HOME/droid" ] && [ "${DROID_FORCE:-0}" != "1" ]; then
-  echo '==> droid binary already staged, skipping download (DROID_FORCE=1 to refresh)'
+if [ -x "$DROID_HOME/droid" ] && [ "$(cat "$DROID_HOME/.version" 2>/dev/null)" = "$VER" ] \
+   && [ "${DROID_FORCE:-0}" != "1" ]; then
+  echo "==> droid ${VER} already staged, skipping download (DROID_FORCE=1 to refresh)"
 else
   echo "==> Downloading droid ${VER} (linux/arm64) + sha256 sidecar…"
   TMPD="$(mktemp -d)"
   trap 'rm -rf "$TMPD"' EXIT
-  cd "$TMPD"
+  cd "$TMPD" || exit 1
   curl -fsSLO "$BASE/droid"
   curl -fsSLO "$BASE/droid.sha256"
   echo '==> Verifying checksum…'
   echo "$(awk '{print $1}' droid.sha256)  droid" | sha256sum --check
   mkdir -p "$DROID_HOME"
-  mv droid "$DROID_HOME/droid"
+  mv -f droid "$DROID_HOME/droid"
   chmod +x "$DROID_HOME/droid"
+  echo "$VER" > "$DROID_HOME/.version"
 fi
 
 echo '==> Writing glibc-runner wrapper…'
+rm -f "$WRAPPER"
 cat > "$WRAPPER" <<'EOF'
 #!/data/data/com.termux/files/usr/bin/sh
 exec grun "$PREFIX/opt/droid/droid" "$@"

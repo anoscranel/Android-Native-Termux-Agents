@@ -1,5 +1,5 @@
 # Kimi Code on Termux (native Android, no proot)
-**Verdict:** PATCHED-NATIVE · **Confidence:** high — device-verified 2026-10-20 (`kimi 2.2.0`; node-pty source build skipped by stock install, then a full agent turn against an OpenAI-compatible endpoint)
+**Verdict:** PATCHED-NATIVE · **Confidence:** high — device-verified 2026-10-20 (`kimi 2.2.0`; node-pty built from source; a full agent turn against a BYOK OpenAI-compatible endpoint)
 
 ## TL;DR
 ```bash
@@ -12,29 +12,26 @@ Moonshot AI's official terminal coding agent **Kimi Code CLI** (bin `kimi`), dri
 ⚠️ The old pure-Python PyPI `kimi-cli` is **archived** — do not use. ⚠️ `kimi-api.com/kimi-cli` is an SEO imposter (third-party proxy, not Moonshot).
 
 ## One-command install
-```bash
-curl -fsSL https://raw.githubusercontent.com/anoscranel/Android-Native-Termux-Agents/master/harnesses/division-2/Kimi-Code-Android/install.sh | bash
-```
-The npm one-liner `npm install -g @moonshot-ai/kimi-code` works once build tools are in place; the script installs them for you.
+The TL;DR line is the one command. The npm one-liner `npm install -g @moonshot-ai/kimi-code` works once build tools are in place; the script installs them for you.
 
 ## Step-by-step
 1. `pkg install nodejs make clang python` — the npm package depends on native `node-pty`, and node-gyp compiles it from source (no android-arm64 prebuild). Termux Node v24.18 satisfies ≥ 22.19.
 2. `npm install -g @moonshot-ai/kimi-code@2.2.0`
 3. `kimi --version`, then `cd <project> && kimi`.
-4. First launch `/login` → **Kimi Code OAuth** (browser device-flow; on the phone the URL opens in the browser, approve, code returns automatically or paste the printed code) **or** a **Moonshot AI Open Platform API key**.
+4. First launch `/login` → **Kimi Code OAuth** (device flow, see quirks) **or** a **Moonshot AI Open Platform API key**.
 
-Vendor route (desktop): `curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash` downloads a linux-arm64 glibc binary and explicitly rejects musl; on bionic it needs the native-side glibc runner (`glibc-repo` + `grun`). Prefer npm.
+Vendor script (`curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash`) downloads a linux-arm64 glibc binary and rejects musl; on Bionic it needs the glibc runner (`glibc-repo` + `grun`). Prefer npm.
 
 ## Termux quirks & workarounds
-- node-pty is the known friction point. If node-gyp fails: `pkg install build-essential lld`, retry; also try `npm config set scripts-prepend-node-path true`. **Verified on a real Android phone:** node-gyp build inside `.pnpm`/global node_modules completed clean, CLI booted (`--help`).
-- Deps are modest (`ws`, `qrcode`, `@mariozechner/clipboard`, `node-pty`) — no dlopen-heavy natives.
-- Phone OAuth: `termux-open-url` assist, keep the phone unlocked, callback loops to localhost.
+- node-pty is the known friction point. If node-gyp fails: `pkg install build-essential lld` and retry (the script does this once). On the test phone the build completed clean.
+- Deps are modest (`ws`, `qrcode`, `@mariozechner/clipboard`, `node-pty`) — no heavy native libraries.
+- Phone OAuth is a device flow: open the URL with `termux-open-url`, approve, and paste the code if it does not return on its own. No localhost callback.
 - **BYOK works:** add a custom provider in `~/.kimi-code/config.toml` (`type = "openai"`, `baseUrl`, literal `apiKey`) plus a `[models.<alias>]` entry (must include `maxContextSize`) — verified end-to-end on-device. Note: `apiKey` is read as a literal string; the `apiKeyEnv` indirection wasn't honored in 2.2.0.
-- Long sessions: `tmux` + `termux-wake-lock` (Android phantom process killer).
-- `kimi acp` (Zed/JetBrains integration) is desktop-oriented — skip on phone.
+- Phantom process killer (~32 child processes, device-wide): use `tmux` and disable child-process restrictions in Developer Options.
+- Skip `kimi acp` (Zed/JetBrains editor integration) on a phone.
 
 ## Limits
-- Device-verified to `--help`; the full agentic loop still depends on Moonshot's backend. No published npm checksums; pinned by version only (`install.sh` pins `2.2.0`, override via `KIMI_VERSION=`).
+- Device-verified to `--help` plus one full agent turn via a BYOK OpenAI-compatible endpoint. Kimi OAuth and Moonshot's own backend were not tested. No published npm checksums; pinned by version only (`KIMI_VERSION=` overrides).
 
 ## Sources
 - https://github.com/MoonshotAI/kimi-code
