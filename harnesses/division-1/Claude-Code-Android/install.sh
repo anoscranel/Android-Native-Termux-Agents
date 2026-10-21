@@ -6,7 +6,7 @@
 set -Eeuo pipefail
 
 PREFIX=/data/data/com.termux/files/usr
-HOME_DIR=/data/data/com.termux/files/home
+HOME_DIR="${HOME:-/data/data/com.termux/files/home}"
 
 # Pinned versions (2026-10-20)
 CLAUDE_NPM_VER=2.1.288
@@ -77,10 +77,10 @@ echo '==> writing wrapper ~/.local/bin/claude (DISABLE_AUTOUPDATER=1, LD_PRELOAD
 # Remove first: a vendor install may have left a symlink here, and writing
 # through it would overwrite the vendor binary.
 rm -f "$BIN_DIR/claude"
-cat > "$BIN_DIR/claude" <<'EOF'
+cat > "$BIN_DIR/claude" <<EOF
 #!/data/data/com.termux/files/usr/bin/sh
 export DISABLE_AUTOUPDATER=1
-exec env LD_PRELOAD= /data/data/com.termux/files/home/.local/bin/claude-bin "$@"
+exec env LD_PRELOAD= "$BIN_DIR/claude-bin" "\$@"
 EOF
 chmod +x "$BIN_DIR/claude"
 

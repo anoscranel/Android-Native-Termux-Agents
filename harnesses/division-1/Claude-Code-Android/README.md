@@ -1,6 +1,9 @@
 # Claude Code on Termux (native Android, no proot)
 **Verdict:** PATCHED-NATIVE · **Confidence:** high — method runs on a real aarch64 Android phone (`claude 2.1.295`); this script pins payload 2.1.288 and was not re-run there
 
+> [!WARNING]
+> This installer downloads a **patched, unofficial build** of the vendor's binary from the third-party repo [`mrfandu1/patched-cli-payloads`](https://github.com/mrfandu1/patched-cli-payloads). The vendor does not publish or endorse it, and that repo states no license. The script pins the payload's sha256, taken from the same release (trust on first use): it detects a changed file, not who built it. Read `install.sh` and check the vendor's terms before you run it.
+
 ## TL;DR
 ```bash
 curl -fsSL https://raw.githubusercontent.com/anoscranel/Android-Native-Termux-Agents/master/harnesses/division-1/Claude-Code-Android/install.sh | bash

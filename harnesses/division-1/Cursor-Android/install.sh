@@ -7,7 +7,7 @@
 set -Eeuo pipefail
 
 PREFIX=/data/data/com.termux/files/usr
-HOME_DIR=/data/data/com.termux/files/home
+HOME_DIR="${HOME:-/data/data/com.termux/files/home}"
 BASE="$HOME_DIR/.local/share/cursor-agent/versions"
 BIN_DIR="$HOME_DIR/.local/bin"
 LOADER="$PREFIX/glibc/lib/ld-linux-aarch64.so.1"

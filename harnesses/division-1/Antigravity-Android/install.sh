@@ -6,7 +6,7 @@
 set -Eeuo pipefail
 
 PREFIX=/data/data/com.termux/files/usr
-HOME_DIR=/data/data/com.termux/files/home
+HOME_DIR="${HOME:-/data/data/com.termux/files/home}"
 REL="https://github.com/mrfandu1/patched-cli-payloads/releases/download/payloads-v2"
 # hash pinned from the release SHA256SUMS on 2026-10-21 (trust-on-first-use)
 AGY_SHA256=4e32b762d11328f48171c0b0060f9d9b3e37cf1eceb36e5d3d95d8ac197a4677
